@@ -1,0 +1,73 @@
+
+# Ignore everything by default
+/*
+
+# Allowlist core dotfiles
+!.gitignore
+!README.md
+!install.sh
+!autostart/
+!hypr/
+!waybar/
+!waypaper/
+!kitty/
+!rofi/
+!mako/
+!qt6ct/
+!gtk-3.0/
+!gtk-4.0/
+!flameshot/
+!networkmanager-dmenu/
+!xsettingsd/
+!mimeapps.list
+!user-dirs.dirs
+!user-dirs.locale
+
+# Keep Kvantum empty (do not track themes)
+!Kvantum/
+Kvantum/*
+!Kvantum/.gitkeep
+
+# Always ignore app data roots
+BraveSoftware/
+Code/
+Code - OSS/
+mozilla/
+spotify/
+dconf/
+pulse/
+session/
+go/telemetry/
+yay/
+wireshark/
+QtProject.conf
+
+# Common junk and generated files
+**/*.log
+**/*.tmp
+**/*.swp
+**/*.swo
+**/*.bak
+**/*.lock
+**/*~
+**/*.sqlite
+**/*.db
+**/*.ldb
+**/*.journal
+
+# Browser/Chromium-style data
+**/Cache/**
+**/cache/**
+**/Code Cache/**
+**/GPUCache/**
+**/Crashpad/**
+**/Service Worker/**
+**/Session Storage/**
+**/Local Storage/**
+**/IndexedDB/**
+**/Cookies*
+**/Network Persistent State
+**/Local State
+**/Preferences
+**/History
+

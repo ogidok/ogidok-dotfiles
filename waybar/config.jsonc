@@ -1,0 +1,101 @@
+{
+    "layer": "top",
+    "position": "top",
+    "modules-left": ["bluetooth", "network", "custom/ip", "custom/htb", "custom/space-left"],
+        "hyprland/workspaces": {
+            "format": "{icon}",
+            "format-icons": {
+                "active": "󰮯",
+                "default": ""
+            },
+            "on-click": "activate",
+            "sort-by-number": true,
+            "all-outputs": true
+        },
+        "custom/music": {
+            "exec": "~/.config/waybar/scripts/music.sh",
+            "interval": 5,
+            "format": "  {}",
+            "tooltip": true
+        },
+    "modules-center": ["hyprland/workspaces"],
+        "clock": {
+            "format": "  {:%H:%M}",
+            "tooltip": true,
+            "interval": 60
+        },
+    "modules-right": ["custom/space-right", "custom/music", "pulseaudio", "battery", "clock", "custom/powermenu"],
+            
+    
+    "network": {
+        "format-wifi": "  {essid}",
+        "format-ethernet": "󰈀  Ethernet",
+        "format-disconnected": "󰖪  Offline",
+        "max-length": 14,
+        "tooltip-format": "{ifname}\n{ipaddr}",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ipaddr}",
+        "interval": 5,
+        "on-click": "~/.config/waybar/scripts/wifi-menu.sh"
+    },
+            "pulseaudio": {
+                "format": "  {volume}%",
+                "format-muted": "  Muted",
+                "tooltip": true,
+                "scroll-step": 5
+            },
+            "custom/powermenu": {
+                "format": "<span color='red'>⏻</span>",
+                "tooltip": true,
+                "on-click": "~/.config/waybar/scripts/powermenu.sh"
+            },
+        "custom/htb": {
+            "exec": "~/.config/waybar/scripts/htb.sh",
+            "interval": 5,
+            "format": "  {}",
+            "tooltip": false
+        },
+        "custom/space-left": {
+            "exec": "printf ' '",
+            "interval": "once",
+            "format": "{}",
+            "tooltip": false,
+            "min-length": 14,
+            "max-length": 14
+        },
+    "custom/ip": {
+        "exec": "~/.config/waybar/scripts/ip.sh",
+        "interval": 30,
+        "format": "  {}",
+        "tooltip": false
+    },
+        "custom/space-right": {
+            "exec": "printf ' '",
+            "interval": "once",
+            "format": "{}",
+            "tooltip": false,
+            "min-length": 14,
+            "max-length": 14
+        },
+    "battery": {
+        "format": "  {capacity}%",
+        "format-charging": " {capacity}%",
+        "tooltip": true
+    },
+    "bluetooth": {
+        "format-on": "",
+        "format-disabled": "",
+        "format-connected": " {device_alias}",
+        "max-length": 10,
+        "tooltip-format": "{controller_alias}",
+        "tooltip-format-connected": "{device_alias}\n{device_address}",
+        "interval": 5,
+        "on-click": "blueman-manager"
+    }
+
+
+
+ 
+
+
+
+}
