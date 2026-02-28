@@ -156,6 +156,7 @@ pacman_pkgs=(
 
 aur_pkgs=(
     waypaper
+    rofi-themes-collection
 )
 
 if [[ "$install_packages" == "true" ]]; then
