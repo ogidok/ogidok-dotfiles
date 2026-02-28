@@ -49,7 +49,8 @@ Repositorio de dotfiles para Hyprland y componentes clave de un entorno grafico 
 El instalador:
 - Muestra el listado de paquetes antes de instalar.
 - Normaliza rutas segun el usuario actual para evitar hardcodes en configs.
-   
+
+## Vista Principal
 ![Vista Principal](https://github.com/user-attachments/assets/bbcd903e-7bbc-4a8d-8a29-fff1ce37d2af)
 
 ## Personalizacion
