@@ -17,9 +17,4 @@ configuration {
 
 //@theme "$HOME/.config/rofi/themes/rounded-gray-dark.rasi"
 
-<<<<<<< HEAD
-=======
-//@theme "$HOME/.config/rofi/themes/rounded-gray-dark.rasi"
-
->>>>>>> 0976dd4 (init local)
 @theme "/home/daigo/.config/rofi/themes/rounded-gray-dark.rasi"
