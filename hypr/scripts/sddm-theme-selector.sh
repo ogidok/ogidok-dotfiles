@@ -1,16 +1,11 @@
 #!/bin/bash
 
 THEMES_DIR="/usr/share/sddm/themes"
-CONFIG_DIR="/etc/sddm.conf.d"
-CONFIG_FILE="$CONFIG_DIR/theme.conf"
+CONFIG_FILE="/etc/sddm.conf"
 
 if [ ! -d "$THEMES_DIR" ]; then
     echo "No existe: $THEMES_DIR"
     exit 1
-fi
-
-if [ ! -d "$CONFIG_DIR" ]; then
-    sudo mkdir -p "$CONFIG_DIR" || exit 1
 fi
 
 # Obtener lista limpia
@@ -46,11 +41,41 @@ fi
 
 echo "Aplicando tema: $theme"
 
-# Escribir config correcta (forma limpia)
-sudo tee "$CONFIG_FILE" >/dev/null <<EOF
+# Actualizar /etc/sddm.conf sin romper otras secciones
+if [ ! -f "$CONFIG_FILE" ]; then
+    sudo tee "$CONFIG_FILE" >/dev/null <<EOF
 [Theme]
 Current=$theme
 EOF
+elif sudo grep -q '^\[Theme\]' "$CONFIG_FILE"; then
+    if sudo sed -n '/^\[Theme\]/,/^\[/{/^Current=/p}' "$CONFIG_FILE" | grep -q '^Current='; then
+        sudo sed -i "/^\[Theme\]/,/^\[/{s/^Current=.*/Current=$theme/}" "$CONFIG_FILE"
+    else
+        sudo awk -v selected_theme="$theme" '
+            BEGIN { inserted=0 }
+            /^\[Theme\]$/ {
+                print
+                print "Current=" selected_theme
+                inserted=1
+                next
+            }
+            { print }
+            END {
+                if (!inserted) {
+                    print ""
+                    print "[Theme]"
+                    print "Current=" selected_theme
+                }
+            }
+        ' "$CONFIG_FILE" | sudo tee "$CONFIG_FILE" >/dev/null
+    fi
+else
+    sudo tee -a "$CONFIG_FILE" >/dev/null <<EOF
+
+[Theme]
+Current=$theme
+EOF
+fi
 
 # Notificación
 command -v notify-send >/dev/null && notify-send "SDDM" "Tema: $theme"
