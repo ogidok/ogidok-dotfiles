@@ -46,6 +46,7 @@
             "custom/powermenu": {
                 "format": "<span color='red'>⏻</span>",
                 "tooltip": true,
+                "tooltip-format": "SNMenu",
                 "on-click": "SNMENU_CONFIG=$HOME/.config/snmenu/layout.json $HOME/.local/bin/snmenu"
             },
         "custom/htb": {
