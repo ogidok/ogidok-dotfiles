@@ -157,7 +157,6 @@ pacman_pkgs=(
 aur_pkgs=(
     waypaper
     rofi-themes-collection
-    snmenu
 )
 
 if [[ "$install_packages" == "true" ]]; then
@@ -204,7 +203,6 @@ if [[ "$install_configs" == "true" ]]; then
     config_items=(
         hypr
         waybar
-        snmenu
         waypaper
         kitty
         rofi
