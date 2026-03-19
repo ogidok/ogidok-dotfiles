@@ -46,7 +46,7 @@
             "custom/powermenu": {
                 "format": "<span color='red'>⏻</span>",
                 "tooltip": true,
-                "on-click": "~/.local/bin/snmenu -l ~/.config/snmenu/layout.json"
+                "on-click": "SNMENU_CONFIG=$HOME/.config/snmenu/layout.json $HOME/.local/bin/snmenu"
             },
         "custom/htb": {
             "exec": "~/.config/waybar/scripts/htb.sh",
