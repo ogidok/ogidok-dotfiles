@@ -1,7 +1,7 @@
 #!/bin/bash
 
 THEMES_DIR="/usr/share/sddm/themes"
-CONFIG_FILE="/etc/sddm.conf"
+CONFIG_FILE="/etc/sddm.conf.d/theme.conf"
 
 if [ ! -d "$THEMES_DIR" ]; then
     echo "No existe: $THEMES_DIR"
