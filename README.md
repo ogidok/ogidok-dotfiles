@@ -50,17 +50,14 @@ El instalador:
 - Muestra el listado de paquetes antes de instalar.
 - Normaliza rutas segun el usuario actual para evitar hardcodes en configs.
 
+
 ## Vista Principal
-<<<<<<< HEAD
-![Vista Principal](https://github.com/user-attachments/assets/bbcd903e-7bbc-4a8d-8a29-fff1ce37d2af)
-=======
 
 ![Vista Principal](https://github.com/user-attachments/assets/04ef906f-aa00-4bf3-87b4-6a4c2da74f23)
 
 ## Fondo de pantalla
 Si te gusta este fondo, puedes descargarlo aquí:  
 [Descargar wallpaper](https://preview.redd.it/the-keycap-wallpaper-3840x2160-v0-387c295vkh1a1.jpg?width=1080&crop=smart&auto=webp&s=b68ee890330f74aa7273a21ce4e8217146facc87)
->>>>>>> 0976dd4 (init local)
 
 ## Personalizacion
 Puedes modificar scripts, atajos y configuraciones segun tus preferencias. Todo esta organizado para facilitar la edicion y extension.
