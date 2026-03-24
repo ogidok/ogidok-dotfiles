@@ -52,9 +52,16 @@ El instalador:
 
 
 
+
+
 ## Vista Principal
 
 ![Vista Principal](https://github.com/user-attachments/assets/04ef906f-aa00-4bf3-87b4-6a4c2da74f23)
+
+## Rofi
+
+![Rofi](https://github.com/user-attachments/assets/626f5436-33f6-40f8-97c7-79cb5afcebed)
+
 
 ## Fondo de pantalla
 Si te gusta este fondo, puedes descargarlo aquí:  
