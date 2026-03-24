@@ -51,9 +51,6 @@ El instalador:
 - Normaliza rutas segun el usuario actual para evitar hardcodes en configs.
 
 
-
-
-
 ## Vista Principal
 
 ![Vista Principal](https://github.com/user-attachments/assets/04ef906f-aa00-4bf3-87b4-6a4c2da74f23)
