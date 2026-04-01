@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_NAME="cambiar-sddm-theme.sh"
 TARGET_CONF="/etc/sddm.conf.d/theme.conf"
+MAIN_CONF="/etc/sddm.conf"
 
 # Prefer zenity because it is common and simple for this workflow; fallback to yad.
 notify_fallback() {
@@ -295,6 +296,62 @@ Current=$theme
 EOF
 chmod 0644 "$tmp_file"
 mv "$tmp_file" /etc/sddm.conf.d/theme.conf
+
+# Keep /etc/sddm.conf aligned, because it may override /etc/sddm.conf.d/theme.conf
+if [[ -f /etc/sddm.conf ]]; then
+  tmp_main="$(mktemp /etc/sddm.conf.tmp.XXXXXX)"
+  awk -v theme="$theme" '
+    BEGIN {
+      in_theme = 0
+      theme_seen = 0
+      current_set = 0
+    }
+    {
+      line = $0
+      if (line ~ /^\[.*\]$/) {
+        if (in_theme && !current_set) {
+          print "Current=" theme
+          current_set = 1
+        }
+
+        if (line == "[Theme]") {
+          in_theme = 1
+          theme_seen = 1
+        } else {
+          in_theme = 0
+        }
+
+        print line
+        next
+      }
+
+      if (in_theme && line ~ /^[[:space:]]*Current[[:space:]]*=/) {
+        if (!current_set) {
+          print "Current=" theme
+          current_set = 1
+        }
+        next
+      }
+
+      print line
+    }
+    END {
+      if (in_theme && !current_set) {
+        print "Current=" theme
+      }
+
+      if (!theme_seen) {
+        if (NR > 0) {
+          print ""
+        }
+        print "[Theme]"
+        print "Current=" theme
+      }
+    }
+  ' /etc/sddm.conf > "$tmp_main"
+  chmod 0644 "$tmp_main"
+  mv "$tmp_main" /etc/sddm.conf
+fi
 ROOTSCRIPT
   chmod 0700 "$helper"
   err_log="$(mktemp)"
@@ -384,13 +441,13 @@ main() {
     exit 1
   fi
 
-  if ! ask_yes_no "Aplicar el theme '$selected' en $TARGET_CONF?"; then
+  if ! ask_yes_no "Aplicar el theme '$selected' en $TARGET_CONF (y sincronizar $MAIN_CONF si existe)?"; then
     exit 0
   fi
 
   apply_theme "$selected"
 
-  show_info "Theme aplicado: $selected\nArchivo actualizado: $TARGET_CONF\n\nRecarga SDDM reiniciando la sesion o el servicio si quieres probarlo de inmediato."
+  show_info "Theme aplicado: $selected\nArchivo actualizado: $TARGET_CONF\nArchivo sincronizado si existe: $MAIN_CONF\n\nRecarga SDDM reiniciando la sesion o el servicio si quieres probarlo de inmediato."
 }
 
 main "$@"
