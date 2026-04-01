@@ -303,7 +303,7 @@ pick_theme_with_gui() {
     if [[ -n "$CURRENT_THEME" && "${THEME_IDS[$i]}" == "$CURRENT_THEME" ]]; then
       default="TRUE"
     fi
-    rows+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}")
+    rows+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}" "${THEME_PREVIEW_LABELS[$i]}")
   done
 
   selected="$(yad \
@@ -478,52 +478,50 @@ main() {
     exit 1
   fi
 
-  local selected
-  if ! selected="$(pick_theme_with_gui)"; then
-    # Cancelar no hace cambios
-    exit 0
-  fi
-
-  if [[ -z "$selected" ]]; then
-    exit 0
-  fi
-
-  local exists=0
-  local i
-  for i in "${!THEME_IDS[@]}"; do
-    if [[ "${THEME_IDS[$i]}" == "$selected" ]]; then
-      exists=1
-      break
+  local selected exists i preview_path decision
+  while true; do
+    if ! selected="$(pick_theme_with_gui)"; then
+      # Cancelar no hace cambios
+      exit 0
     fi
+
+    if [[ -z "$selected" ]]; then
+      exit 0
+    fi
+
+    exists=0
+    for i in "${!THEME_IDS[@]}"; do
+      if [[ "${THEME_IDS[$i]}" == "$selected" ]]; then
+        exists=1
+        break
+      fi
+    done
+
+    if [[ "$exists" -ne 1 ]]; then
+      show_error "El theme seleccionado no es valido: $selected"
+      exit 1
+    fi
+
+    preview_path="$(get_theme_preview_by_id "$selected")"
+
+    if confirm_or_preview_theme "$selected" "$preview_path"; then
+      decision=0
+    else
+      decision=$?
+    fi
+
+    if [[ "$decision" -eq 10 ]]; then
+      continue
+    fi
+
+    if [[ "$decision" -ne 0 ]]; then
+      exit 0
+    fi
+
+    apply_theme "$selected"
+    show_info "Theme aplicado: $selected\nArchivo actualizado: $TARGET_CONF\n\nRecarga SDDM reiniciando la sesion o el servicio si quieres probarlo de inmediato."
+    break
   done
-
-  if [[ "$exists" -ne 1 ]]; then
-    show_error "El theme seleccionado no es valido: $selected"
-    exit 1
-  fi
-
-  local preview_path
-  preview_path="$(get_theme_preview_by_id "$selected")"
-
-  local decision
-  if confirm_or_preview_theme "$selected" "$preview_path"; then
-    decision=0
-  else
-    decision=$?
-  fi
-
-  if [[ "$decision" -eq 10 ]]; then
-    main
-    return 0
-  fi
-
-  if [[ "$decision" -ne 0 ]]; then
-    exit 0
-  fi
-
-  apply_theme "$selected"
-
-  show_info "Theme aplicado: $selected\nArchivo actualizado: $TARGET_CONF\n\nRecarga SDDM reiniciando la sesion o el servicio si quieres probarlo de inmediato."
 }
 
 main "$@"
