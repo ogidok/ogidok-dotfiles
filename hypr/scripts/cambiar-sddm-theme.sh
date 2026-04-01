@@ -273,6 +273,7 @@ pick_theme_with_gui() {
 apply_theme() {
   local selected="$1"
   local helper
+  local err_log
 
   if [[ ! "$selected" =~ ^[A-Za-z0-9._+-]+$ ]]; then
     show_error "Nombre de theme invalido: $selected"
@@ -296,26 +297,38 @@ chmod 0644 "$tmp_file"
 mv "$tmp_file" /etc/sddm.conf.d/theme.conf
 ROOTSCRIPT
   chmod 0700 "$helper"
+  err_log="$(mktemp)"
 
   local ok=0
   if command -v pkexec >/dev/null 2>&1; then
-    if pkexec "$helper" "$selected"; then
+    if pkexec "$helper" "$selected" 2>"$err_log"; then
       ok=1
     fi
   elif command -v sudo >/dev/null 2>&1; then
-    if sudo "$helper" "$selected"; then
+    if sudo "$helper" "$selected" 2>"$err_log"; then
       ok=1
     fi
   else
     rm -f "$helper"
+    rm -f "$err_log"
     show_error "No se encontro pkexec ni sudo. Instala polkit y/o sudo."
     exit 1
   fi
 
+  local err_text=""
+  if [[ -s "$err_log" ]]; then
+    err_text="$(tr '\n' ' ' < "$err_log")"
+  fi
+
   rm -f "$helper"
+  rm -f "$err_log"
 
   if [[ "$ok" -ne 1 ]]; then
-    show_error "No se pudo aplicar el theme. Revisa permisos de polkit/sudo."
+    if [[ "$err_text" == *"No authentication agent found"* ]]; then
+      show_error "No hay agente polkit en sesion. Inicia uno (ej. polkit-gnome) y vuelve a intentar."
+    else
+      show_error "No se pudo aplicar el theme. Revisa permisos de polkit/sudo.\nDetalle: ${err_text:-sin detalle}"
+    fi
     exit 1
   fi
 }
