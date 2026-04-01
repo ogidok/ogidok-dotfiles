@@ -66,6 +66,49 @@ safe_line() {
   printf '%s' "$s"
 }
 
+find_theme_preview_image() {
+  local theme_dir="$1"
+  local file
+
+  for file in \
+    "$theme_dir/preview.png" \
+    "$theme_dir/Preview.png" \
+    "$theme_dir/screenshot.png" \
+    "$theme_dir/Screenshot.png" \
+    "$theme_dir/preview.jpg" \
+    "$theme_dir/Preview.jpg" \
+    "$theme_dir/preview.jpeg" \
+    "$theme_dir/Preview.jpeg" \
+    "$theme_dir/preview.webp" \
+    "$theme_dir/Preview.webp"; do
+    if [[ -f "$file" ]]; then
+      printf '%s' "$file"
+      return 0
+    fi
+  done
+
+  file="$(find "$theme_dir" -maxdepth 2 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \) | head -n 1 || true)"
+  if [[ -n "$file" ]]; then
+    printf '%s' "$file"
+  fi
+}
+
+open_preview_image() {
+  local image_path="$1"
+
+  if [[ -z "$image_path" || ! -f "$image_path" ]]; then
+    show_info "El theme seleccionado no incluye imagen de preview."
+    return 0
+  fi
+
+  if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$image_path" >/dev/null 2>&1 &
+    return 0
+  fi
+
+  show_info "No se encontro xdg-open para abrir la preview."
+}
+
 parse_ini_file_theme() {
   local file="$1"
   local section=""
@@ -164,12 +207,17 @@ unique_existing_theme_dirs() {
 
 read_theme_metadata() {
   local theme_dir="$1"
-  local id name author description metadata_file
+  local id name author description metadata_file preview preview_label
 
   id="$(basename "$theme_dir")"
   name="$id"
   author=""
   description=""
+  preview="$(find_theme_preview_image "$theme_dir")"
+  preview_label="no"
+  if [[ -n "$preview" ]]; then
+    preview_label="si"
+  fi
 
   for metadata_file in \
     "$theme_dir/metadata.desktop" \
@@ -193,6 +241,8 @@ read_theme_metadata() {
   THEME_NAMES+=("$(safe_line "$name")")
   THEME_AUTHORS+=("$(safe_line "$author")")
   THEME_DESCRIPTIONS+=("$(safe_line "$description")")
+  THEME_PREVIEWS+=("$preview")
+  THEME_PREVIEW_LABELS+=("$preview_label")
 }
 
 collect_themes() {
@@ -202,6 +252,8 @@ collect_themes() {
   THEME_NAMES=()
   THEME_AUTHORS=()
   THEME_DESCRIPTIONS=()
+  THEME_PREVIEWS=()
+  THEME_PREVIEW_LABELS=()
 
   for dir in "${THEME_DIRS[@]}"; do
     while IFS= read -r theme_path; do
@@ -228,6 +280,7 @@ pick_theme_with_gui() {
       --column "Nombre"
       --column "Autor"
       --column "Descripcion"
+      --column "Preview"
       --print-column=2
     )
 
@@ -236,7 +289,7 @@ pick_theme_with_gui() {
       if [[ -n "$CURRENT_THEME" && "${THEME_IDS[$i]}" == "$CURRENT_THEME" ]]; then
         default="TRUE"
       fi
-      args+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}")
+      args+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}" "${THEME_PREVIEW_LABELS[$i]}")
     done
 
     selected="$(zenity "${args[@]}" 2>/dev/null)" || return 1
@@ -264,10 +317,75 @@ pick_theme_with_gui() {
     --column="Nombre" \
     --column="Autor" \
     --column="Descripcion" \
+    --column="Preview" \
     --print-column=2 \
     "${rows[@]}" 2>/dev/null)" || return 1
 
   printf '%s' "$selected"
+}
+
+get_theme_preview_by_id() {
+  local selected="$1"
+  local i
+  for i in "${!THEME_IDS[@]}"; do
+    if [[ "${THEME_IDS[$i]}" == "$selected" ]]; then
+      printf '%s' "${THEME_PREVIEWS[$i]}"
+      return 0
+    fi
+  done
+  printf ''
+}
+
+confirm_or_preview_theme() {
+  local selected="$1"
+  local preview_path="$2"
+  local msg
+
+  msg="Theme seleccionado: $selected"
+  if [[ -n "$preview_path" ]]; then
+    msg+="\nPreview: disponible"
+  else
+    msg+="\nPreview: no disponible"
+  fi
+
+  if [[ "$GUI_TOOL" == "zenity" ]]; then
+    local response=""
+    response="$(zenity --question \
+      --title="Confirmar theme" \
+      --text="$msg" \
+      --ok-label="Aplicar" \
+      --cancel-label="Cancelar" \
+      --extra-button="Previsualizar" 2>/dev/null)"
+    local status=$?
+
+    if [[ "$status" -eq 0 ]]; then
+      if [[ "$response" == "Previsualizar" ]]; then
+        open_preview_image "$preview_path"
+        return 10
+      fi
+      return 0
+    fi
+    return 1
+  fi
+
+  yad --question \
+    --title="Confirmar theme" \
+    --text="$msg" \
+    --button="Previsualizar:2" \
+    --button="Aplicar:0" \
+    --button="Cancelar:1" >/dev/null 2>&1
+  local status=$?
+
+  if [[ "$status" -eq 2 ]]; then
+    open_preview_image "$preview_path"
+    return 10
+  fi
+
+  if [[ "$status" -eq 0 ]]; then
+    return 0
+  fi
+
+  return 1
 }
 
 apply_theme() {
@@ -384,7 +502,22 @@ main() {
     exit 1
   fi
 
-  if ! ask_yes_no "Aplicar el theme '$selected' en $TARGET_CONF?"; then
+  local preview_path
+  preview_path="$(get_theme_preview_by_id "$selected")"
+
+  local decision
+  if confirm_or_preview_theme "$selected" "$preview_path"; then
+    decision=0
+  else
+    decision=$?
+  fi
+
+  if [[ "$decision" -eq 10 ]]; then
+    main
+    return 0
+  fi
+
+  if [[ "$decision" -ne 0 ]]; then
     exit 0
   fi
 
