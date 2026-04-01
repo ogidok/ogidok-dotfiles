@@ -4,8 +4,11 @@ set -euo pipefail
 SCRIPT_NAME="cambiar-sddm-theme.sh"
 TARGET_CONF="/etc/sddm.conf.d/theme.conf"
 MAIN_CONF="/etc/sddm.conf"
+PREVIEW_MAX_WIDTH=260
+PREVIEW_MAX_HEIGHT=150
+PREVIEW_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/cambiar-sddm-theme/previews"
 
-# Prefer zenity because it is common and simple for this workflow; fallback to yad.
+# Prefer yad for inline previews in list; fallback to zenity.
 notify_fallback() {
   local msg="$1"
   if command -v notify-send >/dev/null 2>&1; then
@@ -14,10 +17,10 @@ notify_fallback() {
 }
 
 GUI_TOOL=""
-if command -v zenity >/dev/null 2>&1; then
-  GUI_TOOL="zenity"
-elif command -v yad >/dev/null 2>&1; then
+if command -v yad >/dev/null 2>&1; then
   GUI_TOOL="yad"
+elif command -v zenity >/dev/null 2>&1; then
+  GUI_TOOL="zenity"
 else
   msg="Necesitas instalar zenity o yad para usar la GUI."
   echo "Error: $msg" >&2
@@ -65,6 +68,36 @@ safe_line() {
   s="${s//$'\n'/ }"
   s="${s//$'\r'/ }"
   printf '%s' "$s"
+}
+
+build_preview_thumbnail() {
+  local source_img="$1"
+  local theme_id="$2"
+  local key out
+
+  [[ -n "$source_img" && -f "$source_img" ]] || {
+    printf '%s' ""
+    return 0
+  }
+
+  mkdir -p "$PREVIEW_CACHE_DIR"
+  key="$(printf '%s' "$source_img" | sha1sum | awk '{print $1}')"
+  out="$PREVIEW_CACHE_DIR/${theme_id}-${key}.png"
+
+  if [[ ! -s "$out" ]]; then
+    if command -v magick >/dev/null 2>&1; then
+      magick "$source_img" -auto-orient -thumbnail "${PREVIEW_MAX_WIDTH}x${PREVIEW_MAX_HEIGHT}>" "$out" 2>/dev/null || true
+    elif command -v convert >/dev/null 2>&1; then
+      convert "$source_img" -auto-orient -thumbnail "${PREVIEW_MAX_WIDTH}x${PREVIEW_MAX_HEIGHT}>" "$out" 2>/dev/null || true
+    fi
+  fi
+
+  if [[ -s "$out" ]]; then
+    printf '%s' "$out"
+  else
+    # Fallback if thumbnail generation is unavailable.
+    printf '%s' "$source_img"
+  fi
 }
 
 parse_ini_file_theme() {
@@ -165,12 +198,13 @@ unique_existing_theme_dirs() {
 
 read_theme_metadata() {
   local theme_dir="$1"
-  local id name author description metadata_file
+  local id name author description metadata_file preview
 
   id="$(basename "$theme_dir")"
   name="$id"
   author=""
   description=""
+  preview=""
 
   for metadata_file in \
     "$theme_dir/metadata.desktop" \
@@ -187,13 +221,47 @@ read_theme_metadata() {
     if grep -q '^Description=' "$metadata_file"; then
       description="$(grep -m1 '^Description=' "$metadata_file" | cut -d'=' -f2-)"
     fi
+    if grep -q -E '^(Screenshot|ScreenShot)=' "$metadata_file"; then
+      preview="$(grep -m1 -E '^(Screenshot|ScreenShot)=' "$metadata_file" | cut -d'=' -f2-)"
+      if [[ -n "$preview" && "$preview" != /* ]]; then
+        preview="$theme_dir/$preview"
+      fi
+      if [[ ! -f "$preview" ]]; then
+        preview=""
+      fi
+    fi
     break
   done
+
+  # Common preview filenames used by many SDDM themes.
+  if [[ -z "$preview" ]]; then
+    local candidate
+    for candidate in \
+      "$theme_dir/preview.png" \
+      "$theme_dir/preview.jpg" \
+      "$theme_dir/preview.jpeg" \
+      "$theme_dir/preview.webp" \
+      "$theme_dir/Preview.png" \
+      "$theme_dir/screenshot.png" \
+      "$theme_dir/screenshot.jpg" \
+      "$theme_dir/screenshots/preview.png" \
+      "$theme_dir/artwork/preview.png"; do
+      if [[ -f "$candidate" ]]; then
+        preview="$candidate"
+        break
+      fi
+    done
+  fi
+
+  if [[ -n "$preview" ]]; then
+    preview="$(build_preview_thumbnail "$preview" "$id")"
+  fi
 
   THEME_IDS+=("$id")
   THEME_NAMES+=("$(safe_line "$name")")
   THEME_AUTHORS+=("$(safe_line "$author")")
   THEME_DESCRIPTIONS+=("$(safe_line "$description")")
+  THEME_PREVIEWS+=("$preview")
 }
 
 collect_themes() {
@@ -203,6 +271,7 @@ collect_themes() {
   THEME_NAMES=()
   THEME_AUTHORS=()
   THEME_DESCRIPTIONS=()
+  THEME_PREVIEWS=()
 
   for dir in "${THEME_DIRS[@]}"; do
     while IFS= read -r theme_path; do
@@ -222,7 +291,7 @@ pick_theme_with_gui() {
       --title "Seleccionar theme de SDDM"
       --width=980
       --height=600
-      --text "Theme actual: ${CURRENT_THEME:-desconocido}\n\nRutas detectadas:\n${text_dirs}"
+      --text "Theme actual: ${CURRENT_THEME:-desconocido}\n\nRutas detectadas:\n${text_dirs}\n\nNota: para preview inline instala yad."
       --radiolist
       --column "Usar"
       --column "Theme"
@@ -251,13 +320,13 @@ pick_theme_with_gui() {
     if [[ -n "$CURRENT_THEME" && "${THEME_IDS[$i]}" == "$CURRENT_THEME" ]]; then
       default="TRUE"
     fi
-    rows+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}")
+    rows+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}" "${THEME_PREVIEWS[$i]}")
   done
 
   selected="$(yad \
     --list \
     --title="Seleccionar theme de SDDM" \
-    --width=980 --height=600 \
+    --width=1200 --height=640 \
     --text="Theme actual: ${CURRENT_THEME:-desconocido}\n\nRutas detectadas:\n${text_dirs}" \
     --radiolist \
     --column="Usar:CHK" \
@@ -265,7 +334,9 @@ pick_theme_with_gui() {
     --column="Nombre" \
     --column="Autor" \
     --column="Descripcion" \
+    --column="Preview:IMG" \
     --print-column=2 \
+    --expand-column=4 \
     "${rows[@]}" 2>/dev/null)" || return 1
 
   printf '%s' "$selected"
