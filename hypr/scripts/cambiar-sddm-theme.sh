@@ -5,18 +5,28 @@ SCRIPT_NAME="cambiar-sddm-theme.sh"
 TARGET_CONF="/etc/sddm.conf.d/theme.conf"
 
 # Prefer zenity because it is common and simple for this workflow; fallback to yad.
+notify_fallback() {
+  local msg="$1"
+  if command -v notify-send >/dev/null 2>&1; then
+    notify-send "SDDM Theme" "$msg" || true
+  fi
+}
+
 GUI_TOOL=""
 if command -v zenity >/dev/null 2>&1; then
   GUI_TOOL="zenity"
 elif command -v yad >/dev/null 2>&1; then
   GUI_TOOL="yad"
 else
-  echo "Error: necesitas instalar zenity o yad para usar la GUI." >&2
+  msg="Necesitas instalar zenity o yad para usar la GUI."
+  echo "Error: $msg" >&2
+  notify_fallback "$msg"
   exit 1
 fi
 
 show_error() {
   local msg="$1"
+  notify_fallback "$msg"
   if [[ "$GUI_TOOL" == "zenity" ]]; then
     zenity --error --title="SDDM Theme" --text="$msg" || true
   else
