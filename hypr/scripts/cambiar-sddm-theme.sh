@@ -4,8 +4,8 @@ set -euo pipefail
 SCRIPT_NAME="cambiar-sddm-theme.sh"
 TARGET_CONF="/etc/sddm.conf.d/theme.conf"
 MAIN_CONF="/etc/sddm.conf"
-PREVIEW_MAX_WIDTH=260
-PREVIEW_MAX_HEIGHT=150
+PREVIEW_MAX_WIDTH=100
+PREVIEW_MAX_HEIGHT=100
 PREVIEW_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/cambiar-sddm-theme/previews"
 
 # Prefer yad for inline previews in list; fallback to zenity.
