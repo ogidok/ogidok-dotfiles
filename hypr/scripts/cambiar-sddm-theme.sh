@@ -18,6 +18,13 @@ notify_fallback() {
   fi
 }
 
+run_gui() {
+  local tool="$1"
+  shift
+  # Force readable scaling for GTK dialogs in sessions with low GDK_DPI_SCALE.
+  env -u YAD_OPTIONS GDK_SCALE=1 GDK_DPI_SCALE=1 "$tool" "$@"
+}
+
 GUI_TOOL=""
 if command -v yad >/dev/null 2>&1; then
   GUI_TOOL="yad"
@@ -34,27 +41,27 @@ show_error() {
   local msg="$1"
   notify_fallback "$msg"
   if [[ "$GUI_TOOL" == "zenity" ]]; then
-    zenity --error --title="SDDM Theme" --text="$msg" || true
+    run_gui zenity --error --title="SDDM Theme" --width=640 --text="$msg" || true
   else
-    yad --error --title="SDDM Theme" --text="$msg" || true
+    run_gui yad --error --title="SDDM Theme" --width=640 --text="$msg" || true
   fi
 }
 
 show_info() {
   local msg="$1"
   if [[ "$GUI_TOOL" == "zenity" ]]; then
-    zenity --info --title="SDDM Theme" --text="$msg" || true
+    run_gui zenity --info --title="SDDM Theme" --width=680 --text="$msg" || true
   else
-    yad --info --title="SDDM Theme" --text="$msg" || true
+    run_gui yad --info --title="SDDM Theme" --width=680 --text="$msg" || true
   fi
 }
 
 ask_yes_no() {
   local msg="$1"
   if [[ "$GUI_TOOL" == "zenity" ]]; then
-    zenity --question --title="SDDM Theme" --text="$msg"
+    run_gui zenity --question --title="SDDM Theme" --width=480 --height=160 --text="$msg"
   else
-    yad --question --title="SDDM Theme" --text="$msg"
+    run_gui yad --question --title="SDDM Theme" --width=480 --height=160 --center --buttons-layout=center --text-align=center --text="$msg"
   fi
 }
 
@@ -311,7 +318,7 @@ pick_theme_with_gui() {
       args+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}")
     done
 
-    selected="$(zenity "${args[@]}" 2>/dev/null)" || return 1
+    selected="$(run_gui zenity "${args[@]}" 2>/dev/null)" || return 1
     printf '%s' "$selected"
     return 0
   fi
@@ -325,7 +332,7 @@ pick_theme_with_gui() {
     rows+=("$default" "${THEME_IDS[$i]}" "${THEME_NAMES[$i]}" "${THEME_AUTHORS[$i]:-(sin autor)}" "${THEME_DESCRIPTIONS[$i]:-(sin descripcion)}" "${THEME_PREVIEWS[$i]}")
   done
 
-  selected="$(yad \
+  selected="$(run_gui yad \
     --list \
     --title="Seleccionar theme de SDDM" \
     --width="$UI_WIDTH" --height="$UI_HEIGHT" \
@@ -551,7 +558,7 @@ main() {
     exit 1
   fi
 
-  if ! ask_yes_no "Aplicar el theme '$selected' en $TARGET_CONF (y sincronizar $MAIN_CONF si existe)?"; then
+  if ! ask_yes_no "Aplicar theme '$selected'?"; then
     exit 0
   fi
 
