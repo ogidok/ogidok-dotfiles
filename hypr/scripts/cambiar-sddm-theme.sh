@@ -7,6 +7,8 @@ MAIN_CONF="/etc/sddm.conf"
 PREVIEW_MAX_WIDTH=100
 PREVIEW_MAX_HEIGHT=100
 PREVIEW_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/cambiar-sddm-theme/previews"
+UI_WIDTH=1400
+UI_HEIGHT=820
 
 # Prefer yad for inline previews in list; fallback to zenity.
 notify_fallback() {
@@ -81,7 +83,7 @@ build_preview_thumbnail() {
   }
 
   mkdir -p "$PREVIEW_CACHE_DIR"
-  key="$(printf '%s' "$source_img" | sha1sum | awk '{print $1}')"
+  key="$(printf '%s|%s|%s' "$source_img" "$PREVIEW_MAX_WIDTH" "$PREVIEW_MAX_HEIGHT" | sha1sum | awk '{print $1}')"
   out="$PREVIEW_CACHE_DIR/${theme_id}-${key}.png"
 
   if [[ ! -s "$out" ]]; then
@@ -289,8 +291,8 @@ pick_theme_with_gui() {
     args=(
       --list
       --title "Seleccionar theme de SDDM"
-      --width=980
-      --height=600
+      --width="$UI_WIDTH"
+      --height="$UI_HEIGHT"
       --text "Theme actual: ${CURRENT_THEME:-desconocido}\n\nRutas detectadas:\n${text_dirs}\n\nNota: para preview inline instala yad."
       --radiolist
       --column "Usar"
@@ -326,7 +328,7 @@ pick_theme_with_gui() {
   selected="$(yad \
     --list \
     --title="Seleccionar theme de SDDM" \
-    --width=1200 --height=640 \
+    --width="$UI_WIDTH" --height="$UI_HEIGHT" \
     --text="Theme actual: ${CURRENT_THEME:-desconocido}\n\nRutas detectadas:\n${text_dirs}" \
     --radiolist \
     --column="Usar:CHK" \
@@ -340,6 +342,41 @@ pick_theme_with_gui() {
     "${rows[@]}" 2>/dev/null)" || return 1
 
   printf '%s' "$selected"
+}
+
+normalize_selected_theme() {
+  local raw="$1"
+  local cleaned token i
+
+  cleaned="$(printf '%s' "$raw" | tr -d '\r' | head -n1)"
+  cleaned="$(trim "$cleaned")"
+
+  [[ -n "$cleaned" ]] || {
+    printf '%s' ""
+    return 0
+  }
+
+  # Fast path: exact match.
+  for i in "${!THEME_IDS[@]}"; do
+    if [[ "${THEME_IDS[$i]}" == "$cleaned" ]]; then
+      printf '%s' "$cleaned"
+      return 0
+    fi
+  done
+
+  # yad may return full row text in some versions/setups; split common separators.
+  while IFS= read -r token; do
+    token="$(trim "$token")"
+    [[ -n "$token" ]] || continue
+    for i in "${!THEME_IDS[@]}"; do
+      if [[ "${THEME_IDS[$i]}" == "$token" ]]; then
+        printf '%s' "$token"
+        return 0
+      fi
+    done
+  done < <(printf '%s' "$cleaned" | tr '|,;\t ' '\n')
+
+  printf '%s' "$cleaned"
 }
 
 apply_theme() {
@@ -493,6 +530,8 @@ main() {
     # Cancelar no hace cambios
     exit 0
   fi
+
+  selected="$(normalize_selected_theme "$selected")"
 
   if [[ -z "$selected" ]]; then
     exit 0
