@@ -16,7 +16,6 @@ print_ip() {
 	fi
 }
 
-
 if [ "$1" = "--watch" ]; then
 	interval="${2:-30}"
 	while true; do
