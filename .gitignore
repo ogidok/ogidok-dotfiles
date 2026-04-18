@@ -4,6 +4,7 @@
 
 
 # Allowlist core dotfiles
+!system/
 !.gitignore
 !README.md
 !install.sh
