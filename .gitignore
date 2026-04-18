@@ -2,7 +2,6 @@
 # Ignore everything by default
 /*
 
-
 # Allowlist core dotfiles
 !.gitignore
 !README.md
