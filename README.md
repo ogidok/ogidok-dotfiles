@@ -66,6 +66,126 @@ Si no tienes helper AUR (`yay`/`paru`), instala `snmenu` manualmente para que fu
 - el keybind de apagado en Hyprland
 - el boton de energia en Waybar
 
+## install.sh (detalle completo)
+
+### Que hace el script
+- Ejecuta en modo seguro con `set -euo pipefail`.
+- Muestra splash ASCII (`accsiart.txt`) al iniciar.
+- Detecta usuario objetivo en este orden:
+   - `--target-user USER`
+   - `SUDO_USER`
+   - usuario actual (`$USER` / `id -un`)
+- Resuelve `HOME` y `~/.config` del usuario objetivo.
+- Soporta modo simulacion (`--dry-run`) para ver todas las acciones.
+- Crea backups antes de sobrescribir (ruta base):
+   - `~/.local/state/dotfiles-backups/<timestamp>/...`
+
+### Opciones disponibles
+- `--packages-only`: instala paquetes, no despliega configs.
+- `--config-only`: despliega configs de usuario, no instala paquetes.
+- `--install-system`: instala/configura SDDM desde `system/sddm`.
+- `--no-aur`: omite instalacion AUR.
+- `--copy`: copia archivos/directorios.
+- `--link`: crea symlinks (default).
+- `--target-user USER`: define usuario objetivo.
+- `--dry-run`: no ejecuta cambios reales.
+- `-h`, `--help`: ayuda.
+
+### Paquetes que instala (pacman)
+- hyprland
+- xdg-desktop-portal-hyprland
+- waybar
+- swww
+- mako
+- rofi
+- kitty
+- dolphin
+- hyprlock
+- wlogout
+- gnome-keyring
+- networkmanager
+- network-manager-applet
+- brightnessctl
+- playerctl
+- pipewire
+- wireplumber
+- bluez
+- bluez-utils
+- blueman
+- flameshot
+- grim
+- slurp
+- wl-clipboard
+- qt6ct
+- kvantum
+- papirus-icon-theme
+- ttf-jetbrains-mono-nerd
+- ttf-font-awesome
+- noto-fonts
+- libnotify
+- xdg-user-dirs
+- polkit-gnome
+
+### Paquetes AUR
+- waypaper
+- rofi-themes-collection
+
+### Paquete extra AUR (snmenu)
+- Si `snmenu` no existe en `PATH`, intenta instalar:
+   - `snmenu`
+   - fallback: `snmenu-git`
+- Si no hay helper AUR (`yay`/`paru`), muestra warning.
+
+### Servicios que habilita
+- `systemctl enable --now NetworkManager`
+- `systemctl enable --now bluetooth`
+- Si usas `--install-system`:
+   - `systemctl enable sddm`
+
+### Dotfiles que despliega en ~/.config
+- `autostart`
+- `hypr`
+- `waybar`
+- `waypaper`
+- `kitty`
+- `rofi`
+- `mako`
+- `qt6ct`
+- `Kvantum`
+- `gtk-3.0`
+- `gtk-4.0`
+- `flameshot`
+- `networkmanager-dmenu`
+- `snmenu`
+- `xsettingsd`
+- `user-dirs.dirs`
+- `user-dirs.locale`
+- `mimeapps.list`
+
+### Instalacion de SDDM (con --install-system)
+- Verifica entorno Arch Linux.
+- Verifica/instala paquete `sddm`.
+- Crea directorios:
+   - `/etc/sddm.conf.d`
+   - `/usr/share/sddm/themes`
+   - `/var/lib/AccountsService/icons`
+- Copia configuracion:
+   - `system/sddm/sddm.conf` -> `/etc/sddm.conf`
+   - `system/sddm/conf.d/*.conf` -> `/etc/sddm.conf.d/`
+- Copia themes:
+   - `system/sddm/themes/*` -> `/usr/share/sddm/themes/`
+- Detecta y fija theme activo en:
+   - `/etc/sddm.conf.d/10-theme.conf`
+- Copia avatar:
+   - `system/sddm/avatar.png` -> `/var/lib/AccountsService/icons/<usuario>`
+- Usa permisos `644` para archivos de config y avatar.
+
+### Idempotencia y seguridad
+- Si destino ya apunta al mismo origen, hace `skip`.
+- Si archivo no cambia (comparacion binaria), no sobrescribe.
+- Antes de reemplazar, crea backup.
+- No rompe si se ejecuta varias veces.
+
 
 ## Vista Principal
 

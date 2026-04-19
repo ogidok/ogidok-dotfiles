@@ -80,16 +80,42 @@ TARGET_HOME=""
 CONFIG_ROOT=""
 BACKUP_ROOT=""
 
+COLOR_RESET=""
+COLOR_BOLD=""
+COLOR_DIM=""
+COLOR_RED=""
+COLOR_GREEN=""
+COLOR_YELLOW=""
+COLOR_BLUE=""
+COLOR_CYAN=""
+
+init_colors() {
+    if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+        COLOR_RESET='\033[0m'
+        COLOR_BOLD='\033[1m'
+        COLOR_DIM='\033[2m'
+        COLOR_RED='\033[31m'
+        COLOR_GREEN='\033[32m'
+        COLOR_YELLOW='\033[33m'
+        COLOR_BLUE='\033[34m'
+        COLOR_CYAN='\033[36m'
+    fi
+}
+
+print_banner() {
+    printf '%b\n' "${COLOR_BLUE}${COLOR_BOLD}==>${COLOR_RESET} ${COLOR_BOLD}$*${COLOR_RESET}"
+}
+
 log() {
-    printf '[dotfiles] %s\n' "$*"
+    printf '%b\n' "${COLOR_GREEN}[dotfiles]${COLOR_RESET} $*"
 }
 
 warn() {
-    printf '[dotfiles][warn] %s\n' "$*" >&2
+    printf '%b\n' "${COLOR_YELLOW}[dotfiles][warn]${COLOR_RESET} $*" >&2
 }
 
 die() {
-    printf '[dotfiles][error] %s\n' "$*" >&2
+    printf '%b\n' "${COLOR_RED}${COLOR_BOLD}[dotfiles][error]${COLOR_RESET} $*" >&2
     exit 1
 }
 
@@ -98,7 +124,9 @@ show_splash() {
 
     if [[ -f "$splash_file" ]]; then
         printf '\n'
-        cat "$splash_file"
+        while IFS= read -r line; do
+            printf '%b\n' "${COLOR_CYAN}${line}${COLOR_RESET}"
+        done < "$splash_file"
         printf '\n\n'
     fi
 }
@@ -306,6 +334,7 @@ install_snmenu_binary() {
 install_packages() {
     ensure_arch
     ensure_cmd pacman
+    print_banner "Instalando paquetes"
 
     log "Paquetes pacman a instalar:"
     printf ' - %s\n' "${PACMAN_PKGS[@]}"
@@ -398,6 +427,8 @@ install_user_configs() {
     local item src dst
     local repo_real config_real
 
+    print_banner "Desplegando dotfiles de usuario"
+
     repo_real="$(readlink -f "$REPO_ROOT")"
     config_real="$(readlink -f "$CONFIG_ROOT")"
 
@@ -460,6 +491,8 @@ EOF
 install_sddm() {
     local src_root="$REPO_ROOT/system/sddm"
     local aur_helper=""
+
+    print_banner "Instalando y configurando SDDM"
 
     [[ -d "$src_root" ]] || die "No existe carpeta requerida: $src_root"
     ensure_arch
@@ -538,7 +571,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 resolve_target_user
+init_colors
 show_splash
+print_banner "Inicio de instalacion"
+log "Usuario objetivo: $TARGET_USER"
+log "HOME objetivo: $TARGET_HOME"
+log "Config root: $CONFIG_ROOT"
 
 if [[ "$INSTALL_PACKAGES" == "true" ]]; then
     install_packages
