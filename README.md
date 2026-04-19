@@ -56,7 +56,7 @@ El instalador:
 - Despliega `~/.config/snmenu/layout.json` cuando existe en el repo.
 - Permite instalar archivos de sistema SDDM con `--install-system`.
 
-> Nota de alcance actual: este script todavia no alcanza a configurar al 100% SDDM ni SN Menu.
+> Nota de alcance actual: este script todavia no alcanza a configurar al 100% SDDM ni SNMenu.
 > Esa configuracion completa se implementara en futuros releases.
 
 ## Flujo recomendado (100% reproducible)
