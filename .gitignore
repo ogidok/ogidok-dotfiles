@@ -25,6 +25,13 @@
 !user-dirs.dirs
 !user-dirs.locale
 
+# Optional allowlist (enable if you decide to track these)
+#!zsh/
+#!nvim/
+#!alacritty/
+#!tmux/
+#!git/
+
 # Keep Kvantum empty (do not track themes)
 !Kvantum/
 Kvantum/*
@@ -72,4 +79,23 @@ QtProject.conf
 **/Local State
 **/Preferences
 **/History
+
+# Secrets and credentials
+**/.env
+**/.env.*
+**/*.pem
+**/*.p12
+**/*.pfx
+**/*.kdbx
+**/*.key
+**/id_rsa
+**/id_rsa.pub
+**/id_ed25519
+**/id_ed25519.pub
+**/known_hosts
+**/authorized_keys
+**/.gnupg/**
+**/credentials
+**/secrets.yml
+**/secrets.yaml
 
