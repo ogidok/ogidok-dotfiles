@@ -9,6 +9,8 @@ DRY_RUN=false
 INSTALL_PACKAGES=true
 INSTALL_CONFIGS=true
 INSTALL_SYSTEM=false
+INSTALL_SECURITY_PACKAGES=false
+SECURITY_OPTION_EXPLICIT=false
 USE_AUR=true
 MODE="link"
 TARGET_USER_OVERRIDE=""
@@ -52,6 +54,25 @@ PACMAN_PKGS=(
 AUR_PKGS=(
     waypaper
     rofi-themes-collection
+)
+
+SECURITY_PACMAN_PKGS=(
+    ufw
+    firewalld
+    wireshark-qt
+    nmap
+    whatweb
+    sqlmap
+    nikto
+    metasploit
+    tcpdump
+    traceroute
+    bind
+)
+
+SECURITY_AUR_PKGS=(
+    burpsuite
+    airgeddon
 )
 
 USER_ITEMS=(
@@ -139,6 +160,7 @@ Options:
   --packages-only     Install packages only
   --config-only       Install user config only
   --install-system    Install/configure SDDM from system/sddm
+    --security-packages Install security toolset (firewall/auditing/pentest)
   --no-aur            Skip AUR packages
   --copy              Copy files instead of symlinks
   --link              Use symlinks (default)
@@ -361,6 +383,32 @@ install_packages() {
     fi
 }
 
+install_security_packages() {
+    ensure_arch
+    ensure_cmd pacman
+    print_banner "Instalando toolset de seguridad"
+
+    log "Paquetes de seguridad (pacman):"
+    printf ' - %s\n' "${SECURITY_PACMAN_PKGS[@]}"
+
+    run_root_cmd pacman -S --needed --noconfirm "${SECURITY_PACMAN_PKGS[@]}"
+
+    local aur_helper=""
+    if [[ "$USE_AUR" == "true" ]]; then
+        if aur_helper="$(find_aur_helper)"; then
+            log "Paquetes de seguridad (AUR):"
+            printf ' - %s\n' "${SECURITY_AUR_PKGS[@]}"
+            run_cmd "$aur_helper" -S --needed --noconfirm "${SECURITY_AUR_PKGS[@]}"
+        else
+            warn "No se encontro yay/paru. Se omite instalacion AUR de seguridad."
+        fi
+    fi
+
+    if command -v systemctl >/dev/null 2>&1; then
+        run_root_cmd systemctl enable --now ufw
+    fi
+}
+
 ensure_user_ownership() {
     local path="$1"
     if [[ "$EUID" -eq 0 && "$TARGET_USER" != "root" ]]; then
@@ -545,11 +593,39 @@ install_sddm() {
     fi
 }
 
+prompt_security_packages() {
+    if [[ "$SECURITY_OPTION_EXPLICIT" == "true" ]]; then
+        return 0
+    fi
+
+    if [[ ! -t 0 || ! -t 1 ]]; then
+        return 0
+    fi
+
+    printf '%b' "${COLOR_BLUE}${COLOR_BOLD}==>${COLOR_RESET} ${COLOR_BOLD}Ademas desea instalar paquetes de auditoria y seguridad?${COLOR_RESET} ${COLOR_DIM}[s/N]${COLOR_RESET} "
+    local answer=""
+    read -r answer || true
+
+    case "${answer,,}" in
+        s|si|y|yes)
+            INSTALL_SECURITY_PACKAGES=true
+            log "Se habilito la instalacion de paquetes de seguridad."
+            ;;
+        *)
+            log "Se omitira la instalacion de paquetes de seguridad."
+            ;;
+    esac
+}
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --packages-only) INSTALL_CONFIGS=false ;;
         --config-only) INSTALL_PACKAGES=false ;;
         --install-system) INSTALL_SYSTEM=true ;;
+        --security-packages)
+            INSTALL_SECURITY_PACKAGES=true
+            SECURITY_OPTION_EXPLICIT=true
+            ;;
         --no-aur) USE_AUR=false ;;
         --copy) MODE="copy" ;;
         --link) MODE="link" ;;
@@ -573,6 +649,7 @@ done
 resolve_target_user
 init_colors
 show_splash
+prompt_security_packages
 print_banner "Inicio de instalacion"
 log "Usuario objetivo: $TARGET_USER"
 log "HOME objetivo: $TARGET_HOME"
@@ -588,6 +665,10 @@ fi
 
 if [[ "$INSTALL_SYSTEM" == "true" ]]; then
     install_sddm
+fi
+
+if [[ "$INSTALL_SECURITY_PACKAGES" == "true" ]]; then
+    install_security_packages
 fi
 
 log "Listo."
