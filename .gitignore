@@ -25,6 +25,7 @@
 !mimeapps.list
 !user-dirs.dirs
 !user-dirs.locale
+!accsiart.txt
 
 # Optional allowlist (enable if you decide to track these)
 #!zsh/
