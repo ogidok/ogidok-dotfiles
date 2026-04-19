@@ -17,4 +17,4 @@ configuration {
 
 //@theme "$HOME/.config/rofi/themes/rounded-gray-dark.rasi"
 
-@theme "/home/daigo/.config/rofi/themes/rounded-gray-dark.rasi"
+@theme "~/.config/rofi/themes/rounded-gray-dark.rasi"
