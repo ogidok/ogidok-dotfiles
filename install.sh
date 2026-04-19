@@ -93,6 +93,16 @@ die() {
     exit 1
 }
 
+show_splash() {
+    local splash_file="$REPO_ROOT/accsiart.txt"
+
+    if [[ -f "$splash_file" ]]; then
+        printf '\n'
+        cat "$splash_file"
+        printf '\n\n'
+    fi
+}
+
 usage() {
     cat <<'EOF'
 Usage: ./install.sh [options]
@@ -528,6 +538,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 resolve_target_user
+show_splash
 
 if [[ "$INSTALL_PACKAGES" == "true" ]]; then
     install_packages
