@@ -1,0 +1,42 @@
+[
+  {
+    "label": "shutdown",
+    "action": "systemctl poweroff",
+    "text": "",
+    "keybind": "s",
+    "color": "#d1646f",
+    "hover_color": "#e37a84",
+    "icon_char": "\uf011",
+    "show_label": false
+  },
+  {
+    "label": "reboot",
+    "action": "systemctl reboot",
+    "text": "",
+    "keybind": "r",
+    "color": "#536680",
+    "hover_color": "#6d87ab",
+    "icon_char": "\uf021",
+    "show_label": false
+  },
+  {
+    "label": "logout",
+    "action": "hyprctl dispatch exit",
+    "text": "",
+    "keybind": "e",
+    "color": "#4f627d",
+    "hover_color": "#6883a6",
+    "icon_char": "\uf08b",
+    "show_label": false
+  },
+  {
+    "label": "lock",
+    "action": "hyprlock",
+    "text": "",
+    "keybind": "l",
+    "color": "#6b86a8",
+    "hover_color": "#85a3c7",
+    "icon_char": "\uf023",
+    "show_label": false
+  }
+]

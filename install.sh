@@ -68,6 +68,7 @@ USER_ITEMS=(
     gtk-4.0
     flameshot
     networkmanager-dmenu
+    snmenu
     xsettingsd
     user-dirs.dirs
     user-dirs.locale
@@ -160,10 +161,45 @@ install_packages() {
         run_cmd "$aur_helper" -S --needed --noconfirm "${AUR_PKGS[@]}"
     fi
 
+    install_snmenu_binary "$aur_helper"
+
     if command -v systemctl >/dev/null 2>&1; then
         run_cmd sudo systemctl enable --now NetworkManager
         run_cmd sudo systemctl enable --now bluetooth
     fi
+}
+
+install_snmenu_binary() {
+    local aur_helper="${1:-}"
+
+    if command -v snmenu >/dev/null 2>&1; then
+        log "snmenu ya esta disponible en PATH."
+        return 0
+    fi
+
+    if [[ -z "$aur_helper" ]]; then
+        warn "snmenu no esta instalado y no hay helper AUR disponible."
+        warn "Instala manualmente snmenu o snmenu-git para habilitar el menu de energia."
+        return 0
+    fi
+
+    local candidate
+    for candidate in snmenu snmenu-git; do
+        if [[ "$DRY_RUN" == "true" ]]; then
+            run_cmd "$aur_helper" -S --needed --noconfirm "$candidate"
+            return 0
+        fi
+
+        if "$aur_helper" -S --needed --noconfirm "$candidate"; then
+            log "snmenu instalado mediante paquete AUR: $candidate"
+            return 0
+        fi
+
+        warn "No se pudo instalar paquete AUR: $candidate"
+    done
+
+    warn "No fue posible instalar snmenu automaticamente."
+    warn "El keybind de apagado funcionara cuando el binario snmenu este instalado."
 }
 
 sed_escape() {

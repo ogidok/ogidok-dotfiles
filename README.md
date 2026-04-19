@@ -40,15 +40,31 @@ Repositorio de dotfiles para Hyprland y componentes clave de un entorno grafico 
 1. Clona el repositorio dentro de `~/.config`.
 2. Previsualiza la instalacion sin cambios:
    - `./install.sh --dry-run`
-3. Instala paquetes y configs:
+3. Instala paquetes y configs de usuario:
    - `./install.sh`
-4. Solo paquetes o solo configs:
+4. Opciones utiles:
    - `./install.sh --packages-only`
    - `./install.sh --config-only`
+   - `./install.sh --install-system` (SDDM en `/etc` y `/usr/share`)
+   - `./install.sh --copy` (copia) o `./install.sh --link` (symlinks)
+   - `./install.sh --no-aur`
 
 El instalador:
 - Muestra el listado de paquetes antes de instalar.
-- Normaliza rutas segun el usuario actual para evitar hardcodes en configs.
+- Soporta AUR con `yay` o `paru`.
+- Intenta instalar `snmenu` automaticamente (`snmenu` o `snmenu-git` en AUR).
+- Despliega `~/.config/snmenu/layout.json` cuando existe en el repo.
+- Permite instalar archivos de sistema SDDM con `--install-system`.
+
+## Flujo recomendado (100% reproducible)
+1. `./install.sh --packages-only`
+2. `./install.sh --config-only --link`
+3. `./install.sh --install-system` (si usas los temas SDDM del repo)
+4. Cierra sesion y vuelve a entrar en Hyprland.
+
+Si no tienes helper AUR (`yay`/`paru`), instala `snmenu` manualmente para que funcionen:
+- el keybind de apagado en Hyprland
+- el boton de energia en Waybar
 
 
 ## Vista Principal
