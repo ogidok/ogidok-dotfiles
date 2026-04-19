@@ -25,7 +25,6 @@ PACMAN_PKGS=(
     kitty
     dolphin
     hyprlock
-    wlogout
     gnome-keyring
     networkmanager
     network-manager-applet
@@ -52,6 +51,7 @@ PACMAN_PKGS=(
 )
 
 AUR_PKGS=(
+    wlogout
     waypaper
     rofi-themes-collection
 )
@@ -100,6 +100,7 @@ TARGET_USER=""
 TARGET_HOME=""
 CONFIG_ROOT=""
 BACKUP_ROOT=""
+SKIPPED_PACKAGES=()
 
 COLOR_RESET=""
 COLOR_BOLD=""
@@ -133,6 +134,19 @@ log() {
 
 warn() {
     printf '%b\n' "${COLOR_YELLOW}[dotfiles][warn]${COLOR_RESET} $*" >&2
+}
+
+add_skipped_package() {
+    local pkg="$1"
+    local existing
+
+    for existing in "${SKIPPED_PACKAGES[@]}"; do
+        if [[ "$existing" == "$pkg" ]]; then
+            return 0
+        fi
+    done
+
+    SKIPPED_PACKAGES+=("$pkg")
 }
 
 die() {
@@ -313,12 +327,44 @@ install_pkg_if_missing() {
     fi
 
     if [[ -n "$aur_helper" ]]; then
-        run_cmd "$aur_helper" -S --needed --noconfirm "$pkg"
+        if run_cmd "$aur_helper" -S --needed --noconfirm "$pkg"; then
+            log "Paquete instalado: $pkg"
+            return 0
+        fi
     else
-        run_root_cmd pacman -S --needed --noconfirm "$pkg"
+        if run_root_cmd pacman -S --needed --noconfirm "$pkg"; then
+            log "Paquete instalado: $pkg"
+            return 0
+        fi
     fi
 
-    log "Paquete instalado: $pkg"
+    warn "No se pudo instalar paquete (se omite): $pkg"
+    add_skipped_package "$pkg"
+    return 0
+}
+
+install_package_list() {
+    local aur_helper="${1:-}"
+    shift || true
+
+    local pkg
+    for pkg in "$@"; do
+        install_pkg_if_missing "$pkg" "$aur_helper"
+    done
+}
+
+print_skipped_packages_summary() {
+    local pkg
+
+    if [[ "${#SKIPPED_PACKAGES[@]}" -eq 0 ]]; then
+        log "No se omitio ningun paquete."
+        return 0
+    fi
+
+    warn "Paquetes omitidos (${#SKIPPED_PACKAGES[@]}):"
+    for pkg in "${SKIPPED_PACKAGES[@]}"; do
+        warn " - $pkg"
+    done
 }
 
 install_snmenu_binary() {
@@ -369,10 +415,15 @@ install_packages() {
         warn "No se encontro yay/paru. Se omite AUR."
     fi
 
-    run_root_cmd pacman -S --needed --noconfirm "${PACMAN_PKGS[@]}"
+    install_package_list "" "${PACMAN_PKGS[@]}"
 
     if [[ -n "$aur_helper" ]]; then
-        run_cmd "$aur_helper" -S --needed --noconfirm "${AUR_PKGS[@]}"
+        install_package_list "$aur_helper" "${AUR_PKGS[@]}"
+    elif [[ "$USE_AUR" == "true" ]]; then
+        local aur_pkg
+        for aur_pkg in "${AUR_PKGS[@]}"; do
+            add_skipped_package "$aur_pkg"
+        done
     fi
 
     install_snmenu_binary "$aur_helper"
@@ -391,16 +442,20 @@ install_security_packages() {
     log "Paquetes de seguridad (pacman):"
     printf ' - %s\n' "${SECURITY_PACMAN_PKGS[@]}"
 
-    run_root_cmd pacman -S --needed --noconfirm "${SECURITY_PACMAN_PKGS[@]}"
+    install_package_list "" "${SECURITY_PACMAN_PKGS[@]}"
 
     local aur_helper=""
     if [[ "$USE_AUR" == "true" ]]; then
         if aur_helper="$(find_aur_helper)"; then
             log "Paquetes de seguridad (AUR):"
             printf ' - %s\n' "${SECURITY_AUR_PKGS[@]}"
-            run_cmd "$aur_helper" -S --needed --noconfirm "${SECURITY_AUR_PKGS[@]}"
+            install_package_list "$aur_helper" "${SECURITY_AUR_PKGS[@]}"
         else
             warn "No se encontro yay/paru. Se omite instalacion AUR de seguridad."
+            local aur_pkg
+            for aur_pkg in "${SECURITY_AUR_PKGS[@]}"; do
+                add_skipped_package "$aur_pkg"
+            done
         fi
     fi
 
@@ -670,5 +725,7 @@ fi
 if [[ "$INSTALL_SECURITY_PACKAGES" == "true" ]]; then
     install_security_packages
 fi
+
+print_skipped_packages_summary
 
 log "Listo."
