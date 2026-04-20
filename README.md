@@ -1,3 +1,21 @@
+
+     ██████╗  ██████╗ ██╗██████╗  ██████╗ ██╗  ██╗           
+    ██╔═══██╗██╔════╝ ██║██╔══██╗██╔═══██╗██║ ██╔╝           
+    ██║   ██║██║  ███╗██║██║  ██║██║   ██║█████╔╝            
+    ██║   ██║██║   ██║██║██║  ██║██║   ██║██╔═██╗            
+    ╚██████╔╝╚██████╔╝██║██████╔╝╚██████╔╝██║  ██╗           
+     ╚═════╝  ╚═════╝ ╚═╝╚═════╝  ╚═════╝ ╚═╝  ╚═╝           
+                                                             
+██████╗  ██████╗ ████████╗███████╗██╗██╗     ███████╗███████╗
+██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝██║██║     ██╔════╝██╔════╝
+██║  ██║██║   ██║   ██║   █████╗  ██║██║     █████╗  ███████╗
+██║  ██║██║   ██║   ██║   ██╔══╝  ██║██║     ██╔══╝  ╚════██║
+██████╔╝╚██████╔╝   ██║   ██║     ██║███████╗███████╗███████║
+╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝
+                                                             v1
+
+
+
 # Configuracion de Hyprland en Arch Linux
 
 Repositorio de dotfiles para Hyprland y componentes clave de un entorno grafico moderno en Arch Linux. Incluye configuraciones, scripts y un instalador para aplicar todo de forma reproducible. Estos dotfiles estan en constante actualizacion.
