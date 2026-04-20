@@ -133,6 +133,7 @@ Si no tienes helper AUR (`yay`/`paru`), instala `snmenu` manualmente para que fu
 - waypaper
 - rofi-themes-collection
 
+
 ### Paquete extra AUR (snmenu)
 - Si `snmenu` no existe en `PATH`, intenta instalar:
    - `snmenu`
