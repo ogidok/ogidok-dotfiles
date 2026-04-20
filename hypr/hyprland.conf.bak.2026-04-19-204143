@@ -62,7 +62,6 @@ env = GDK_DPI_SCALE,0.5
 env = QT_AUTO_SCREEN_SCALE_FACTOR,0
 env = QT_SCALE_FACTOR,1
 env = QT_QPA_PLATFORM,wayland
-env = AQ_DRM_DEVICES,/dev/dri/card1:/dev/dri/card0
 ###################
 ### PERMISSIONS ###
 ###################
@@ -350,7 +349,7 @@ windowrule {
 }
 # Force zero scaling for XWayland apps. This is useful if you want to handle scaling yourself with something like qt6ct or gdk.
 xwayland {
-    force_zero_scaling = false
+    force_zero_scaling = true
 }
 # Hyprland-run windowrule
 windowrule {
