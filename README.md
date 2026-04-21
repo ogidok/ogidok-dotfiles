@@ -209,12 +209,18 @@ Si no tienes helper AUR (`yay`/`paru`), instala `snmenu` manualmente para que fu
 
 ## Vista Principal
 
-![Vista Principal](https://github.com/user-attachments/assets/04ef906f-aa00-4bf3-87b4-6a4c2da74f23)
+![Vista Principal](https://github.com/user-attachments/assets/80bf7c66-7ab0-40ec-bc11-be9c6e6379d2)
+
 
 ## Rofi
 
-![Rofi](https://github.com/user-attachments/assets/626f5436-33f6-40f8-97c7-79cb5afcebed)
 
+![Rofi](https://github.com/user-attachments/assets/7762849c-2301-42a4-bcb7-3f73caf77598)
+
+
+## SNMENU (power menu)
+
+![SNMENU](https://github.com/user-attachments/assets/21fec8c3-607d-4719-8c25-145254dbfee1)
 
 ## Fondo de pantalla
 Si te gusta este fondo, puedes descargarlo aquí:  
