@@ -68,6 +68,7 @@ Repositorio de dotfiles para Hyprland y componentes clave de un entorno grafico 
 El instalador:
 - Muestra el listado de paquetes antes de instalar.
 - Soporta AUR con `yay` o `paru`.
+- Si no detecta helper AUR, intenta instalar `yay` automaticamente.
 - Intenta instalar `snmenu` automaticamente (`snmenu` o `snmenu-git` en AUR).
 - Despliega `~/.config/snmenu/layout.json` cuando existe en el repo.
 - Permite instalar archivos de sistema SDDM con `--install-system`.
@@ -80,10 +81,6 @@ El instalador:
 2. `./install.sh --config-only --link`
 3. `./install.sh --install-system` (si usas los temas SDDM del repo)
 4. Cierra sesion y vuelve a entrar en Hyprland.
-
-Si no tienes helper AUR (`yay`/`paru`), instala `snmenu` manualmente para que funcionen:
-- el keybind de apagado en Hyprland
-- el boton de energia en Waybar
 
 ## install.sh (detalle completo)
 
@@ -154,7 +151,12 @@ Si no tienes helper AUR (`yay`/`paru`), instala `snmenu` manualmente para que fu
 - Si `snmenu` no existe en `PATH`, intenta instalar:
    - `snmenu`
    - fallback: `snmenu-git`
-- Si no hay helper AUR (`yay`/`paru`), muestra warning.
+
+### Helper AUR (yay/paru)
+- Si hay `yay` o `paru`, los reutiliza para paquetes AUR.
+- Si no hay helper AUR y AUR esta habilitado, intenta instalar `yay` automaticamente.
+- Para instalar `yay`, instala dependencias base (`base-devel`, `git`) y compila desde AUR como usuario normal (no root).
+- Si no puede completar esa instalacion automatica, omite paquetes AUR y muestra warning.
 
 ### Servicios que habilita
 - `systemctl enable --now NetworkManager`
