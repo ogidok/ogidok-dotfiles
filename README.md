@@ -86,8 +86,16 @@ El instalador:
 - Despliega `~/.config/snmenu/layout.json` cuando existe en el repo.
 - Permite instalar archivos de sistema SDDM con `--install-system`.
 
-> Nota de alcance actual: este script todavia no alcanza a configurar al 100% SDDM ni SNMenu.
-> Esa configuracion completa se implementara en futuros releases.
+> Importante:
+> Este script es funcional y deja una buena base de mi entorno, pero no instala/configura el 100%.
+> La parte de SDDM y SNMenu debes terminarla manualmente segun tu caso.
+>
+> Recomendacion critica: ejecutalo solo en una instalacion limpia de Arch Linux minimal
+> (base + paquetes obligatorios). Si lo ejecutas sobre un entorno ya personalizado,
+> se mezclaran configuraciones y puedes tener conflictos o errores.
+>
+> Este instalador esta pensado para sistemas nuevos y limpios; no limpia primero un
+> entorno existente para luego instalar desde cero.
 
 ## Flujo recomendado (100% reproducible)
 1. `./install.sh --packages-only`
