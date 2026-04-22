@@ -247,7 +247,7 @@ El instalador:
 
 ## Fondo de pantalla
 Si te gusta este fondo, puedes descargarlo aquí:  
-[Descargar wallpaper](https://preview.redd.it/the-keycap-wallpaper-3840x2160-v0-387c295vkh1a1.jpg?width=1080&crop=smart&auto=webp&s=b68ee890330f74aa7273a21ce4e8217146facc87)
+[Descargar wallpaper](https://i.redd.it/387c295vkh1a1.jpg)
 
 ## Personalizacion
 Puedes modificar scripts, atajos y configuraciones segun tus preferencias. Todo esta organizado para facilitar la edicion y extension.
