@@ -245,6 +245,10 @@ El instalador:
 
 ![SNMENU](https://github.com/user-attachments/assets/21fec8c3-607d-4719-8c25-145254dbfee1)
 
+## Wallpaper selector
+![wps](https://github.com/user-attachments/assets/9310435e-5ac0-4d97-a954-2340d6ed0341)
+
+
 ## Fondo de pantalla
 Si te gusta este fondo, puedes descargarlo aquí:  
 [Descargar wallpaper](https://i.redd.it/387c295vkh1a1.jpg)
