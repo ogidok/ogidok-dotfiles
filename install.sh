@@ -309,6 +309,55 @@ find_aur_helper() {
         printf '%s' "paru"
         return 0
     fi
+
+    warn "No se encontro helper AUR (yay/paru). Se intentara instalar yay automaticamente."
+    if install_yay_helper; then
+        if command -v yay >/dev/null 2>&1; then
+            printf '%s' "yay"
+            return 0
+        fi
+    fi
+
+    warn "No fue posible dejar yay disponible en el sistema."
+    return 1
+}
+
+install_yay_helper() {
+    if command -v yay >/dev/null 2>&1; then
+        log "yay ya esta disponible en PATH."
+        return 0
+    fi
+
+    if [[ "$TARGET_USER" == "root" ]]; then
+        warn "No se puede compilar yay con makepkg como root. Ejecuta el script con un usuario normal."
+        return 1
+    fi
+
+    local current_user="${USER:-$(id -un)}"
+    local cache_root="$TARGET_HOME/.cache"
+    local build_root="$cache_root/dotfiles-yay"
+    local build_cmd='set -euo pipefail; tmpdir="$(mktemp -d "$1/yay.XXXXXX")"; trap "rm -rf \"$tmpdir\"" EXIT; cd "$tmpdir"; git clone https://aur.archlinux.org/yay.git; cd yay; makepkg -si --noconfirm'
+
+    run_root_cmd pacman -S --needed --noconfirm base-devel git
+    run_root_cmd install -d -m 755 -o "$TARGET_USER" -g "$TARGET_USER" "$cache_root"
+    run_root_cmd install -d -m 755 -o "$TARGET_USER" -g "$TARGET_USER" "$build_root"
+
+    if [[ "$EUID" -eq 0 || "$TARGET_USER" != "$current_user" ]]; then
+        if ! command -v sudo >/dev/null 2>&1; then
+            warn "Se necesita sudo para compilar yay como usuario objetivo: $TARGET_USER"
+            return 1
+        fi
+        run_cmd sudo -u "$TARGET_USER" env HOME="$TARGET_HOME" bash -lc "$build_cmd" _ "$build_root"
+    else
+        run_cmd bash -lc "$build_cmd" _ "$build_root"
+    fi
+
+    if command -v yay >/dev/null 2>&1; then
+        log "yay instalado correctamente."
+        return 0
+    fi
+
+    warn "La instalacion automatica de yay no termino correctamente."
     return 1
 }
 
