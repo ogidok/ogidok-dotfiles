@@ -53,12 +53,25 @@ Repositorio de dotfiles para Hyprland y componentes clave de un entorno grafico 
 - Hyprlock para bloqueo de pantalla con blur del ultimo frame.
 
 ## Instalacion rapida
-1. Clona el repositorio dentro de `~/.config`.
-2. Previsualiza la instalacion sin cambios:
-   - `./install.sh --dry-run`
-3. Instala paquetes y configs de usuario:
-   - `./install.sh`
-4. Opciones utiles:
+1. Clona el repositorio dentro de `~/.config` y entra al proyecto:
+   ```bash
+   cd ~/.config
+   git clone https://github.com/ogidok/dotfiles.git
+   cd dotfiles
+   ```
+2. (Opcional) da permisos de ejecucion al script:
+   ```bash
+   chmod +x install.sh
+   ```
+3. Previsualiza la instalacion sin cambios:
+   ```bash
+   ./install.sh --dry-run
+   ```
+4. Ejecuta la instalacion de paquetes + configs de usuario:
+   ```bash
+   ./install.sh
+   ```
+5. Opciones utiles:
    - `./install.sh --packages-only`
    - `./install.sh --config-only`
    - `./install.sh --install-system` (SDDM en `/etc` y `/usr/share`)
