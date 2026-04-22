@@ -59,7 +59,7 @@ Repositorio de dotfiles para Hyprland y componentes clave de un entorno grafico 
    git clone https://github.com/ogidok/dotfiles.git
    cd dotfiles
    ```
-2. (Opcional) da permisos de ejecucion al script:
+2. Da permisos de ejecucion al script:
    ```bash
    chmod +x install.sh
    ```
