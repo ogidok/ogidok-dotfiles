@@ -38,7 +38,7 @@ Repositorio de dotfiles para Hyprland y componentes clave de un entorno grafico 
 ### Wallpapers
 - Carpeta de wallpapers: `~/Pictures/Wallpapers` (se normaliza al usuario actual).
 - Waypaper se inicia automaticamente al iniciar Hyprland junto con `swww`.
-- Seleccion y cambio de fondo en tiempo real usando Rofi.
+- Seleccion y cambio de fondo en tiempo real usando Waypaper.
 
 ### Waybar
 - Barra superior con modulos personalizados: musica, IP, HTB, menu de red, menu de energia, bateria, volumen, hora.
@@ -96,12 +96,6 @@ El instalador:
 >
 > Este instalador esta pensado para sistemas nuevos y limpios; no limpia primero un
 > entorno existente para luego instalar desde cero.
-
-## Flujo recomendado (100% reproducible)
-1. `./install.sh --packages-only`
-2. `./install.sh --config-only --link`
-3. `./install.sh --install-system` (si usas los temas SDDM del repo)
-4. Cierra sesion y vuelve a entrar en Hyprland.
 
 ## install.sh (detalle completo)
 
