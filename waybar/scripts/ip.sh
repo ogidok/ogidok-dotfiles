@@ -4,7 +4,7 @@
 # Modo watch: ./ip.sh --watch [segundos]
 
 get_ip() {
-	ip -4 route get 1.1.1.1 2>/dev/null | awk '/src/ {print $7; exit}'
+	/usr/bin/ip -4 route get 1.1.1.1 2>/dev/null | /usr/bin/awk '/src/ {print $7; exit}'
 }
 
 print_ip() {
@@ -21,7 +21,7 @@ if [ "$1" = "--watch" ]; then
 	interval="${2:-30}"
 	while true; do
 		print_ip
-		sleep "$interval"
+		/usr/bin/sleep "$interval"
 	done
 else
 	print_ip
