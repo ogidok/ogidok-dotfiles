@@ -90,8 +90,8 @@ window#waybar {
 #custom-network,
 #custom-htb,
 #custom-ip,
-#custom-powermenu,
-#custom-music {
+#custom-target,
+#custom-powermenu {
     padding: 5px 8px;
     margin: 0 2px;
     border-radius: 12px;
@@ -102,8 +102,7 @@ window#waybar {
 }
 #pulseaudio { background: #232332; color: #f5f5fa; }
 #custom-powermenu { background: #232332; color: #f38ba8; }
-#custom-music { background: #232332; color: #f5f5fa; }
-#custom-music { color: #94e2d5; }
+#custom-target { background: #232332; color: #94e2d5; }
 
 
 /* Colores semánticos */

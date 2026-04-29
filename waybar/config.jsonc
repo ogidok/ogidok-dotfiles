@@ -12,19 +12,13 @@
             "sort-by-number": true,
             "all-outputs": true
         },
-        "custom/music": {
-            "exec": "~/.config/waybar/scripts/music.sh",
-            "interval": 5,
-            "format": "  {}",
-            "tooltip": true
-        },
     "modules-center": ["hyprland/workspaces"],
         "clock": {
             "format": "  {:%H:%M}",
             "tooltip": true,
             "interval": 60
         },
-    "modules-right": ["custom/space-right", "custom/music", "pulseaudio", "battery", "clock", "tray", "custom/powermenu"],
+    "modules-right": ["custom/space-right", "custom/target", "pulseaudio", "battery", "clock", "tray", "custom/powermenu"],
             
     
     "network": {
@@ -52,6 +46,13 @@
             "exec": "~/.config/waybar/scripts/htb.sh",
             "interval": 5,
             "format": "  {}",
+            "tooltip": false
+        },
+        "custom/target": {
+            "exec": "~/.config/waybar/scripts/target.sh",
+            "interval": 5,
+            "signal": 8,
+            "format": "  Target: {}",
             "tooltip": false
         },
         "custom/space-left": {
